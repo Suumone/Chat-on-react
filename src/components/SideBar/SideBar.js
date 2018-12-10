@@ -3,12 +3,20 @@ import FAChevronDown from 'react-icons/lib/md/keyboard-arrow-down'
 import FAMenu from 'react-icons/lib/fa/list-ul'
 import FASearch from 'react-icons/lib/fa/search'
 import MdEject from 'react-icons/lib/md/eject'
+import {SideBarOption} from './SideBarOption'
+import {get ,last, differenceBy} from 'lodash'
+import {createChatName} from '../../Factories'
 
 export default class SideBar extends Component{
+	static type = {
+		CHATS:"chats",
+		USERS:"users"
+	}
 	constructor(props){
 		super(props)
 		this.state={
-			reciever:""
+			reciever:"",
+			ActiveSideBar: SideBar.type.CHATS
 		}
 	}
 		
@@ -19,9 +27,17 @@ export default class SideBar extends Component{
 		onSendOpenPrivateMessage (reciever)
 		this.setState({reciever:""})
 	}
+	addChatForUser = (username) =>{
+		this.setActiveSideBar(SideBar.type.CHATS)
+		this.props.onSendOpenPrivateMessage(username)
+	}
+	setActiveSideBar= (newSideBar) =>{
+		this.setState({ActiveSideBar: newSideBar})
+	}
+
 	render(){
-		const { chats, activeChat, user, setActiveChat, logout} = this.props
-		const {reciever} = this.state
+		const { chats, activeChat, user, setActiveChat, logout, users} = this.props
+		const {reciever, ActiveSideBar} = this.state
 		return (
 			<div id="side-bar">
 					<div className="heading">
@@ -39,11 +55,26 @@ export default class SideBar extends Component{
 							onChange={(e)=>{this.setState({reciever:e.target.value})}} />
 						<div className="plus"></div>
 					</form>
+
+					<div className="Side-Bar-Select">
+						<div 
+							onClick = { () =>{this.setActiveSideBar(SideBar.type.CHATS)}}
+							className={`Side-Bar-Select__option ${(ActiveSideBar===SideBar.type.CHATS) ? 'active':''}`}>
+							<span>Chats</span>
+							</div>
+						<div 
+							onClick = { () =>{this.setActiveSideBar(SideBar.type.USERS)}}
+							className={`Side-Bar-Select__option${(ActiveSideBar===SideBar.type.USERS) ? 'active':''}`}>
+							<span>Users</span>
+							</div>
+					</div>
+			
 					<div 
 						className="users" 
 						ref='users' 
 						onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }}>				
 						{
+							ActiveSideBar===SideBar.type.CHATS ? 
 						chats.map((chat)=>{
 							if(chat.name){
 								const lastMessage = chat.messages[chat.messages.length - 1];
@@ -53,22 +84,27 @@ export default class SideBar extends Component{
 								const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : ''
 								
 								return(
-								<div 
-									key={chat.id} 
-									className={`user ${classNames}`}
-									onClick={ ()=>{ setActiveChat(chat) } }
-									>
-									<div className="user-photo">{chatSideName[0].toUpperCase()}</div>
-									<div className="user-info">
-										<div className="name">{chatSideName}</div>
-										{lastMessage && <div className="last-message">{lastMessage.message}</div>}
-									</div>
-								</div>
+									<SideBarOption
+									key = {chat.id}
+									name = { chat.Community ? chat.name: createChatName(chat.users, user.name)}
+									lastMessage = {get(last(chat.messages),'message','')}
+									active = {activeChat.id === chat.id}
+									onClick = { () => { this.props.setActiveChat(chat)}}
+									/>
 							)
 							}
 							return null
-						})	
-						}						
+						})
+						:						
+							differenceBy(users, [user], 'name').map((otherUser)=>{
+								return (<SideBarOption
+									key = {otherUser.id}
+									name = { otherUser.name}			
+									onClick = { () => {this.addChatForUser(otherUser)}}
+									/>									
+									)
+							})
+						}							
 					</div>
 					<div className="current-user">
 						<span>{user.name}</span>

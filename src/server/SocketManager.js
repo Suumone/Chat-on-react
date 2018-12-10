@@ -7,11 +7,10 @@ const { VERIFY_USER, USER_CONNECTED, USER_DISCONNECTED,
 const { createUser, createMessage, createChat } = require('../Factories')
 
 let connectedUsers = { }
-let communityChat = createChat()
+let communityChat = createChat({Community:true})
 
 module.exports = function(socket){
 					
-	console.log("Socket Id:" + socket.id);
 
 	let sendMessageToChatFromUser;
 	let sendTypingFromUser;
@@ -69,7 +68,7 @@ module.exports = function(socket){
 		if(reciever in connectedUsers){
 			const recieverSocket = connectedUsers[reciever].socketId
 			if( activeChat === null || activeChat.id === communityChat.id ){
-				const newChat = createChat({name:`${reciever}&${sender}`, users:[reciever, sender]})
+				const newChat = createChat({name:`${reciever} and ${sender}`, users:[reciever, sender]})
 				socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat)
 				socket.emit(PRIVATE_MESSAGE, newChat)
 			}

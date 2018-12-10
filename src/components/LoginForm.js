@@ -15,7 +15,6 @@ export default class LoginForm extends Component {
 		if(isUser){
 			this.setError("This name taken")
 		}else{
-			console.log(user)
 			if(user.name==="Ars-pidor"){
 				this.setError("net Kim pidor")
 			} else {
