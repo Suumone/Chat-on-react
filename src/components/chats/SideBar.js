@@ -15,9 +15,9 @@ export default class SideBar extends Component{
 	handleSubmit = (event) =>{
 		event.preventDefault()
 		const {reciever} = this.state
-		console.log(reciever)
 		const {onSendOpenPrivateMessage}=this.props
 		onSendOpenPrivateMessage (reciever)
+		this.setState({reciever:""})
 	}
 	render(){
 		const { chats, activeChat, user, setActiveChat, logout} = this.props
@@ -42,8 +42,7 @@ export default class SideBar extends Component{
 					<div 
 						className="users" 
 						ref='users' 
-						onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }}>
-						
+						onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }}>				
 						{
 						chats.map((chat)=>{
 							if(chat.name){

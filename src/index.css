@@ -326,7 +326,8 @@ textarea {
 .message-container .name {
     font-size: 10px;
     margin-top: 5px;
-    text-align: right
+    text-align: right;
+    color:#3e3e5e
 }
 
 .message-container .message {
