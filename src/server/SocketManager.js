@@ -2,7 +2,7 @@ const io = require('./index.js').io
 
 const { VERIFY_USER, USER_CONNECTED, USER_DISCONNECTED, 
 		LOGOUT, COMMUNITY_CHAT, MESSAGE_RECIEVED, MESSAGE_SENT,
-		TYPING, PRIVATE_MESSAGE  } = require('../Events')
+		TYPING, PRIVATE_MESSAGE, NEW_CHAT_USER  } = require('../Events')
 
 const { createUser, createMessage, createChat } = require('../Factories')
 
@@ -68,11 +68,20 @@ module.exports = function(socket){
 		if(reciever in connectedUsers){
 			const recieverSocket = connectedUsers[reciever].socketId
 			if( activeChat === null || activeChat.id === communityChat.id ){
-				const newChat = createChat({name:`${reciever} and ${sender}`, users:[reciever, sender]})
+				const newChat = createChat({name:` ${reciever},  ${sender} `, users:[reciever, sender]})
 				socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat)
 				socket.emit(PRIVATE_MESSAGE, newChat)
 			}
 			else{
+				if(!(reciever in activeChat.users)){
+					activeChat.users
+							  .filter( user => connectedUsers)
+							  .map( user => connectedUsers[user])
+							  .map( user =>{
+								  socket.to(user.socketId).emit(NEW_CHAT_USER, {chatId: activeChat.id, NewUser: reciever})
+							  })
+							  socket.emit(NEW_CHAT_USER,{chatId: activeChat.id, NewUser: reciever}) 
+				}
 				socket.to(recieverSocket).emit(PRIVATE_MESSAGE, activeChat)
 			}
 		}

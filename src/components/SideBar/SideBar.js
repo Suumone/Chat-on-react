@@ -20,8 +20,8 @@ export default class SideBar extends Component{
 		}
 	}
 		
-	handleSubmit = (event) =>{
-		event.preventDefault()
+	handleSubmit = (e) =>{
+		e.preventDefault()
 		const {reciever} = this.state
 		const {onSendOpenPrivateMessage}=this.props
 		onSendOpenPrivateMessage (reciever)
@@ -56,54 +56,44 @@ export default class SideBar extends Component{
 						<div className="plus"></div>
 					</form>
 
-					<div className="Side-Bar-Select">
+					<div className="side-bar-Select">
 						<div 
 							onClick = { () =>{this.setActiveSideBar(SideBar.type.CHATS)}}
-							className={`Side-Bar-Select__option ${(ActiveSideBar===SideBar.type.CHATS) ? 'active':''}`}>
-							<span>Chats</span>
-							</div>
+							className={`side-bar-Select__option ${(ActiveSideBar===SideBar.type.CHATS) ? 'active':''}`}>
+								<span>Chats</span>
+						</div>
 						<div 
 							onClick = { () =>{this.setActiveSideBar(SideBar.type.USERS)}}
-							className={`Side-Bar-Select__option${(ActiveSideBar===SideBar.type.USERS) ? 'active':''}`}>
-							<span>Users</span>
-							</div>
+							className={`side-bar-Select__option ${(ActiveSideBar===SideBar.type.USERS) ? 'active':''}`}>
+								<span>Users</span>
+						</div>
 					</div>
 			
 					<div 
 						className="users" 
 						ref='users' 
-						onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }}>				
+						onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }} >				
 						{
 							ActiveSideBar===SideBar.type.CHATS ? 
-						chats.map((chat)=>{
-							if(chat.name){
-								const lastMessage = chat.messages[chat.messages.length - 1];
-								const chatSideName = chat.users.find((name)=>{
-									return name !== this.props.name
-								}) ||"Community"
-								const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : ''
-								
-								return(
-									<SideBarOption
-									key = {chat.id}
-									name = { chat.Community ? chat.name: createChatName(chat.users, user.name)}
-									lastMessage = {get(last(chat.messages),'message','')}
-									active = {activeChat.id === chat.id}
-									onClick = { () => { this.props.setActiveChat(chat)}}
-									/>
-							)
-							}
-							return null
-						})
-						:						
-							differenceBy(users, [user], 'name').map((otherUser)=>{
-								return (<SideBarOption
-									key = {otherUser.id}
-									name = { otherUser.name}			
-									onClick = { () => {this.addChatForUser(otherUser)}}
-									/>									
+								chats.map((chat)=>{
+										return(
+											<SideBarOption
+											key = {chat.id}
+											name = { chat.Community ? chat.name: createChatName(chat.users, user.name)}
+											lastMessage = {get(last(chat.messages),'message','')}
+											active = {activeChat.id === chat.id}
+											onClick = { () => { this.props.setActiveChat(chat)}}
+											/>
 									)
-							})
+									})
+								:						
+									differenceBy(users, [user], 'name').map((user)=>{
+										return <SideBarOption
+											key = {user.id}
+											name = { user.name}			
+											onClick = { () => {this.addChatForUser(user.name)}}
+											/>	
+									})
 						}							
 					</div>
 					<div className="current-user">

@@ -130,13 +130,13 @@ textarea {
     left: 7px
 }
 
-#side-bar .Side-Bar-Select {
+#side-bar .side-bar-Select {
     display: flex;
     justify-content: space-around;
     align-items: center
-}
+}/**/
 
-#side-bar .Side-Bar-Select__option {
+#side-bar .side-bar-Select__option {
     background: #484d79;
     width: 100%;
     height: 100%;
@@ -147,9 +147,10 @@ textarea {
     cursor: pointer
 }
 
-#side-bar .Side-Bar-Select__option.active {
+#side-bar .side-bar-Select__option.active {
     background: #363656
 }
+
 
 #side-bar .users {
     overflow-y: scroll;

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import SideBar from '../SideBar/SideBar'
-import { COMMUNITY_CHAT, MESSAGE_SENT, MESSAGE_RECIEVED, TYPING, PRIVATE_MESSAGE, USER_CONNECTED, USER_DISCONNECTED } from '../../Events'
+import { COMMUNITY_CHAT, MESSAGE_SENT, MESSAGE_RECIEVED, TYPING, PRIVATE_MESSAGE, USER_CONNECTED, USER_DISCONNECTED, NEW_CHAT_USER } from '../../Events'
 import ChatHeading from './ChatHeading'
 import Messages from '../messages/Messages'
 import MessageInput from '../messages/MessageInput'
-import {values} from 'lodash'
+import {values, difference, differenceBy} from 'lodash'
 
 export default class ChatContainer extends Component {
 	constructor(props) {
@@ -27,6 +27,7 @@ export default class ChatContainer extends Component {
 		socket.off( PRIVATE_MESSAGE)
 		socket.off( USER_CONNECTED)
 		socket.off( USER_DISCONNECTED)
+		socket.off( NEW_CHAT_USER)
 	}
 
 	initSocket(socket){		
@@ -36,11 +37,15 @@ export default class ChatContainer extends Component {
 			socket.emit(COMMUNITY_CHAT, this.resetChat)
 		})
 		socket.on(USER_CONNECTED,(users) =>{
+			console.log(users),console.log(values(users)),
 			this.setState({users:values(users)})
 		})
 		socket.on(USER_DISCONNECTED,(users) =>{
+			const removeUser = differenceBy( this.state.users, values(users), 'id')
+			this.removeUserFromChat(removeUser)
 			this.setState({users:values(users)})
 		})
+		socket.on(NEW_CHAT_USER,this.addNewUserToChat )
 	}
 
 	sendOpenPrivateMessage = (reciever)=>{
@@ -48,6 +53,25 @@ export default class ChatContainer extends Component {
 		const{activeChat} = this.state
 		socket.emit(PRIVATE_MESSAGE, {reciever, sender:user.name, activeChat})
 	}
+
+	addNewUserToChat = ({chatId, newUser}) =>{
+		const{chats}=this.state
+		const newChats =chats.map( chat =>{
+			if(chat.id ===chatId){
+				return Object.assign({}, chat, { users: [...chat.users, newUser]})
+			}
+			return chat
+		})
+	}
+	removeUserFromChat = removeUser =>{
+		const{chats}=this.state
+		const newChats =chats.map( chat =>{
+			let newUser = difference( chat.user, removeUser.map(u=>u.name))
+			return  Object.assign({}, chat, { users:newUser })
+		})
+		this.setState({chats:newChats})
+	}
+
 	
 	resetChat = (chat)=>{
 		return this.addChat(chat, true)
